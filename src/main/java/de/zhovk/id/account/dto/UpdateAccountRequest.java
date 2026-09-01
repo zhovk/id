@@ -1,5 +1,9 @@
 package de.zhovk.id.account.dto;
 
-public record UpdateAccountRequest() {
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.Email;
+
+public record UpdateAccountRequest(@Email String email, String language, LocalDate birthday) {
 
 }

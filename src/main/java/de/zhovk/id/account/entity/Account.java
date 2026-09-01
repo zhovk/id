@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import de.zhovk.id.common.entity.BaseEntity;
 import de.zhovk.id.role.entity.Role;
 import jakarta.persistence.Column;
@@ -22,6 +24,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
+@SQLRestriction("deleted_at IS NULL")
 public class Account extends BaseEntity {
 
 	@Column(nullable = false, unique = true)

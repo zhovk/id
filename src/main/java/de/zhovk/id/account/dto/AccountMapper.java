@@ -11,6 +11,8 @@ public interface AccountMapper {
 
 	AccountResponse toResponse(Account account);
 
+	Account toInstance(CreateAccountRequest request);
+
 	void updateAccountFromDto(UpdateAccountRequest request, @MappingTarget Account account);
 
 }
