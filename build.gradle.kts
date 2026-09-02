@@ -1,5 +1,7 @@
 plugins {
 	java
+	checkstyle
+	id("com.diffplug.spotless") version "8.9.0"
 	id("org.springframework.boot") version "4.1.1"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.asciidoctor.jvm.convert") version "4.0.5"
@@ -53,6 +55,16 @@ dependencies {
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
+}
+
+checkstyle {
+	maxWarnings = 0
+}
+
+spotless {
+	java {
+		googleJavaFormat()
+	}
 }
 
 tasks.withType<Test> {
