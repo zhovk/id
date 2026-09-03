@@ -1,10 +1,5 @@
 package de.zhovk.id.account.service;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import de.zhovk.id.account.dto.AccountMapper;
 import de.zhovk.id.account.dto.AccountResponse;
 import de.zhovk.id.account.dto.CreateAccountRequest;
@@ -14,55 +9,64 @@ import de.zhovk.id.account.repository.AccountRepository;
 import de.zhovk.id.exception.ConflictException;
 import de.zhovk.id.exception.NotFoundException;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AccountServiceImpl implements IAccountService {
+public class AccountServiceImpl implements AccountService {
 
-	private final AccountRepository accountRepository;
-	private final AccountMapper accountMapper;
+  private final AccountRepository accountRepository;
+  private final AccountMapper accountMapper;
 
-	@Override
-	@Transactional(readOnly = true)
-	public AccountResponse getAccount(UUID id) {
-		Account account = accountRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Account not found with ID: " + id));
-		return accountMapper.toResponse(account);
-	}
+  @Override
+  @Transactional(readOnly = true)
+  public AccountResponse getAccount(UUID id) {
+    Account account =
+        accountRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Account not found with ID: " + id));
+    return accountMapper.toResponse(account);
+  }
 
-	@Override
-	@Transactional
-	public AccountResponse createAccount(@Valid CreateAccountRequest request) {
+  @Override
+  @Transactional
+  public AccountResponse createAccount(@Valid CreateAccountRequest request) {
 
-		if (accountRepository.findByUsername(request.username()).isPresent()
-				|| accountRepository.findByEmail(request.email()).isPresent()) {
-			throw new ConflictException("Username or E-Mail already taken.");
-		}
+    if (accountRepository.findByUsername(request.username()).isPresent()
+        || accountRepository.findByEmail(request.email()).isPresent()) {
+      throw new ConflictException("Username or E-Mail already taken.");
+    }
 
-		Account account = accountRepository.save(accountMapper.toInstance(request));
+    Account account = accountRepository.save(accountMapper.toInstance(request));
 
-		return accountMapper.toResponse(account);
-	}
+    return accountMapper.toResponse(account);
+  }
 
-	@Override
-	@Transactional
-	public AccountResponse updateAccount(UUID id, UpdateAccountRequest request) {
-		Account account = accountRepository.findById(id).orElseThrow(() -> new NotFoundException("Account not found"));
+  @Override
+  @Transactional
+  public AccountResponse updateAccount(UUID id, UpdateAccountRequest request) {
+    Account account =
+        accountRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Account not found"));
 
-		accountMapper.updateAccountFromDto(request, account);
+    accountMapper.updateAccountFromDto(request, account);
 
-		return accountMapper.toResponse(accountRepository.save(account));
-	}
+    return accountMapper.toResponse(accountRepository.save(account));
+  }
 
-	@Override
-	@Transactional
-	public void deleteAccount(UUID id) {
-		Account account = accountRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Account not found with ID: " + id));
+  @Override
+  @Transactional
+  public void deleteAccount(UUID id) {
+    Account account =
+        accountRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("Account not found with ID: " + id));
 
-		account.delete();
-		accountRepository.save(account);
-	}
-
+    account.delete();
+    accountRepository.save(account);
+  }
 }

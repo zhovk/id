@@ -3,6 +3,8 @@ plugins {
 	id("org.springframework.boot") version "4.1.1"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.asciidoctor.jvm.convert") version "4.0.5"
+    id("com.diffplug.spotless") version "6.25.0"
+	checkstyle
 }
 
 group = "de.zhovk"
@@ -53,6 +55,19 @@ dependencies {
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
+}
+
+checkstyle {
+	toolVersion = "14.1.0"
+	configFile = file("config/checkstyle/checkstyle.xml")
+}
+
+spotless {
+    java {
+        googleJavaFormat("1.36.1")
+        importOrder()
+        removeUnusedImports()
+    }
 }
 
 tasks.withType<Test> {

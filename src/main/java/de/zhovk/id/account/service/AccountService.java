@@ -6,7 +6,7 @@ import de.zhovk.id.account.dto.AccountResponse;
 import de.zhovk.id.account.dto.CreateAccountRequest;
 import de.zhovk.id.account.dto.UpdateAccountRequest;
 
-public interface IAccountService {
+public interface AccountService {
 
 	AccountResponse getAccount(UUID id);
 

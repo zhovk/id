@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class AuditorConfig {
 
-	@Bean
-	public CustomAuditorAware auditorProvider() {
-		return new CustomAuditorAware();
-	}
+  @Bean
+  public CustomAuditorAware auditorProvider() {
+    return new CustomAuditorAware();
+  }
 }
