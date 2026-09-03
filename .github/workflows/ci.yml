@@ -1,17 +1,21 @@
-name: ID
+name: CI
 
 on:
   push:
     branches: [master]
+    tags: ['v*.*.*']
   pull_request:
     branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up JDK 25
@@ -19,6 +23,7 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -41,6 +46,7 @@ jobs:
         with:
           name: test-results
           path: build/reports/tests/test
+          retention-days: 7
 
       - name: Upload built jar
         uses: actions/upload-artifact@v4
@@ -48,14 +54,18 @@ jobs:
           name: app-jar
           path: build/libs/*.jar
           retention-days: 1
+          if-no-files-found: error
 
   docker-build:
     needs: build-and-test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download built jar
@@ -64,5 +74,29 @@ jobs:
           name: app-jar
           path: build/libs
 
-      - name: Build Docker image (runtime stage only)
-        run: docker build -f Dockerfile.runtime -t id-app:${{ github.sha }} .
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.runtime
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
